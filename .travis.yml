@@ -3,8 +3,6 @@ env:
 
 before_install:
   - wget https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/${HUGO_DEB}
-         https://github.com/gohugoio/hugo/releases/download/v0.30/hugo_0.30_Linux-64bit.deb
-
   - sudo dpkg -i ${HUGO_DEB}
 
 script:

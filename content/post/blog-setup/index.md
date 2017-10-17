@@ -11,6 +11,7 @@ Today I thought I would tell you about how this blog was set up, since I have on
 
 The blog is powered by [Hugo](https://gohugo.io), hosted on [Amazon's S3](https://aws.amazon.com/s3), and uses [Travis CI](https://travis-ci.org) for automating builds & deployments.
 
+---
 
 ## The site itself
 The website is powered by Hugo, an open-source static site generator written in Go. It is incredibly fast and takes very little amount of time to set up. I will not into much detail on how to create a Hugo site, as their [docs](https://gohugo.io/getting-started/) are clear and extremely easy to follow.
@@ -90,14 +91,14 @@ Be sure to change the "Principal" and "BucketName" fields to your [AWS account's
 ---
 
 ## Automating builds and deployments using Travis CI
-Travis CI is a continuos integration platform. It has an open source version `travis-ci.org` that integrates nicely with Github hosted code repositories.
+Travis CI is a continuos integration platform. It has an open source version `travis-ci.org` that integrates nicely with GitHub hosted code repositories.
 We are going to use Travis CI mainly to do two things:
 
-* Automate builds: whenever a new commit is pushed to the `owayss/blog` repository on Github, we are going to trigger a new build of our Hugo site.
+* Automate builds: whenever a new commit is pushed to the `owayss/blog` repository on GitHub, we are going to trigger a new build of our Hugo site.
 * Automate deployments: if the build succeeds, we are going to have the Travis CI service deploy the content rendered by Hugo to our S3 bucket.  
 
 
-To do that we would have to create travis-ci.org account, sync our public repositories from Github, and give Travis CI permission to the ones we want to work with. Following the [docs](https://docs.travis-ci.com/user/getting-started/) this process is pretty straightforward.
+To do that we would have to create travis-ci.org account, sync our public repositories from GitHub, and give Travis CI permission to the ones we want to work with. Following the [docs](https://docs.travis-ci.com/user/getting-started/) this process is pretty straightforward.
 
 The next thing we need to do is add a `.travis.yml` file to our repository to tell Travis CI what to do.
 The one for this blog looks like this:
@@ -108,7 +109,7 @@ env:
   - HUGO_DEB="v0.30"
 
 before_install:
-  - wget https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/${HUGO_DEB}
+  - wget https://GitHub.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/${HUGO_DEB}
   - sudo dpkg -i ${HUGO_DEB}
 
 script:
@@ -124,7 +125,7 @@ deploy:
   acl: public_read
   skip_cleanup: true  
 ```
-This tells Travis CI that the Hugo dependency needs to be installed before the build process. We install Hugo by downloading a release from their Github repository and installing it wht `dpkg` (the default environment for Travis CI is an Ubuntu trusty 14.04 image).
+This tells Travis CI that the Hugo dependency needs to be installed before the build process. We install Hugo by downloading a release from their GitHub repository and installing it wht `dpkg` (the default environment for Travis CI is an Ubuntu trusty 14.04 image).
 
 You should have noticed the use of environment variables in the `.travis.yml` file. This is a way of customizing the build process. Environment variables can either be defined in the same YAML file, which is what we have done with the `HUGO_VERSION` and `HUGO_DEB` variables, or, if the variables contain sensitive information, they can be defined in the [repository settings](https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings) on your Travis CI account. This is the case for our AWS secret access keys, `AWSAccessKeyId` and `AWSSecretKey` that the Travis CI service needs in order to be able to push our build to the S3 bucket using the AWS CLI.
 
@@ -140,6 +141,6 @@ This is to tell Travis CI to not clean build artifacts directly after finishing 
 ---
 
 ## Adding new content
-Now, whenever I want to add new content, I just write a new markdown file, commit it to the repository, push to Github, and sip on my tea while waiting for Travis CI to tell me that it had successfully built & deployed the content to S3.
+Now, whenever I want to add new content, I just write a new markdown file, commit it to the repository, push to GitHub, and sip on my tea while waiting for Travis CI to tell me that it had successfully built & deployed the content to S3.
 
 ![Travis CI e-mail](travis-email.png "Travis CI e-mail")
