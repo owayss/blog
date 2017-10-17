@@ -141,3 +141,5 @@ This is to tell Travis CI to not clean build artifacts directly after finishing 
 
 ## Adding new content
 Now, whenever I want to add new content, I just write a new markdown file, commit it to the repository, push to Github, and sip on my tea while waiting for Travis CI to tell me that it had successfully built & deployed the content to S3.
+
+![Travis CI e-mail](travis-email.png "Travis CI e-mail")
