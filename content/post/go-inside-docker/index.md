@@ -36,9 +36,9 @@ func main() {
 }
 ```
 ## The straightforward approach
-Docker containers are launched from images. The standard way of creating an image is by writing a Dockerfile, which can be thought of the "source code" for a container.
+Docker containers are launched from images. The standard way of creating an image is by writing a Dockerfile, which can be thought of as the "source code" for a container.
 
-As our first approach, let us use the one from the [Go blog](https://blog.golang.org/docker)
+As our first approach, let us use the one from the [Go blog](https://blog.golang.org/docker):
 
 ```docker
 # Start from a Debian image with the latest version of Go installed
@@ -86,7 +86,9 @@ Successfully tagged myapp:latest
 ```
 To launch a container from that image, we just run:
 
-`docker run --publish 8080:8080 --name test --rm myapp`
+`docker run --publish 8080:8080 --name myapp_test --rm myapp`
+
+This will run a docker container from the `myapp` image we built earlier, forward the container's port 8080 to the host machine's 8080 port, and set the container's name to `myapp_test`.
 
 Our server should be listening at port 8080:
 ```sh
@@ -102,9 +104,9 @@ IMAGE ID            REPOSITORY          SIZE
 8b48be229a7b        myapp               735MB
 ```
 
-The size of the image is 735MB. That is an awful lot for a hello world app.
+As you can see in the output of the `docker images` command, the size of the image is 735MB. That is an awful lot for a hello world app!
 
-Essentially, a Docker image is made up of filesystems layered over each other. At the base is a boot filesystem, `bootfs`, which resembles the typical Linux/Unix boot filesystem. On top of the `bootfs`, Docker layers a `rootfs`, which, in the case of our `golang:latest` image, is a Debian filesystem.
+Essentially, a Docker image is made up of filesystems layered over each other. At the base is a boot filesystem, `bootfs`, which resembles the typical Linux/Unix boot filesystem. On top of `bootfs`, Docker layers a `rootfs`, which, in the case of our `golang:latest` image, is a Debian filesystem.
 
 
 ![Docker image layers](container-layers.jpg "Docker image layers")
@@ -117,22 +119,40 @@ But, do we _really_ need a complete Linux image to run our Go server?
 
 One of the nicest features of the Go language is that Go binaries can be statically linked. So the key idea here will be to separate the build process from the production environment; to build the Go application in one container, possibly using the same image we created earlier, and then ship the resulting statically linked binary in a different container; a much smaller one.
 
-### The build stage
+### The build container
 We will use the container we built earlier to build our Go app with static linking enabled:
+```sh
+docker exec myapp_test CGO_ENABLED=0 GOOS=linux \
+	go build -a -tags myapp -ldflags "-w -s" -o .
 ```
-docker exec test CGO_ENABLED=0 GOOS=linux go build -a -tags myapp -ldflags '-w' -o .
+The `docker exec` command lets us run a process inside an already running container. Here, the process is the `go build` command to build our Go project and we will be running it inside our `myapp_test` container.
+
+`-ldflags`: the `-s` tells the go tool that this needs to be built as a static binary, the `-w` turns off the DWARF debugging information.  
+
+### The production container
+Now we can just copy the binary we built in the previous step to our host using `docker cp`:
+```sh
+docker cp `docker ps -aqf "name=myapp_test"`:/github.com/user/myapp/myapp .
 ```
-Now we can just copy the resulting binary to our host:
-```
-docker cp `docker ps -aqf "name=test"`:/github.com/user/myapp/myapp .
-```
-And deploy it to a minimal production container:
+
+Since we have statically linked executable, we can just use the `scratch` image.
+
+`scratch` is a reserved minimal Docker image, it is literally of size 0, and it is used to let the build process know that we want the next command in the Dockerfile to be the first filesystem layer in our container image.
+
+Here is what the Dockerfile.prod for our minimal container looks like:
 ```dockerfile
 FROM scratch
 ADD myapp myapp
 EXPOSE 8080
 ENTRYPOINT ["/myapp"]
 ```
+
+To build an image from that file:
+```sh
+docker build -t myapp_prod -f Dockerfile.prod
 ```
-docker run --publish 8080:8080 --name prod --rm myapp
+
+To launch a container from that image:
+```sh
+docker run --publish 8080:8080 --name prod --rm myapp_prod
 ```
