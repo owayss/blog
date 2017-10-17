@@ -1,6 +1,6 @@
 ---
 title: "How this blog is set up"
-description: "Continuos deployment: using Travis CI automate builds of a static website and deployments to Amazon's S3"
+description: "CI/CD pipeline: using Travis CI automate builds and deployments of a static website to Amazon's S3"
 tags: [
 	"aws",
     "ci/cd",
@@ -109,7 +109,7 @@ env:
   - HUGO_DEB="v0.30"
 
 before_install:
-  - wget https://GitHub.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/${HUGO_DEB}
+  - wget https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/${HUGO_DEB}
   - sudo dpkg -i ${HUGO_DEB}
 
 script:
