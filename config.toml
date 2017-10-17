@@ -1,0 +1,6 @@
+baseURL = "http://owayss.me/"
+languageCode = "en-us"
+title = "/var/blog"
+theme = "cactus-plus"
+pygmentsCodeFences = true
+pygmentsStyle = "vs"

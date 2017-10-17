@@ -1,0 +1,17 @@
+<footer id="footer">
+    {{ if .Site.Social }}
+        {{ partial "social.html" . }}
+    {{ end }}
+    <!--p class="small">
+    {{ with .Site.Params.copyright }}
+        {{ . | markdownify }}
+    {{ else }}
+       © Copyright {{ now.Format "2006"}} <i class="fa fa-heart" aria-hidden="true"></i> {{ .Site.Params.name }}
+    {{ end }}
+    </p-->
+    {{ if eq .Page.Title "About" }}
+    <p class="small">
+        Made with ♥ using <a href="http://www.gohugo.io/">Hugo</a> & the <a href="https://github.com/nodejh/hugo-theme-cactus-plus">cactus plus</a> theme.
+    </p>
+    {{ end }}
+</footer>
